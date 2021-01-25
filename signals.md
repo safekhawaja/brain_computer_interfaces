@@ -1,5 +1,10 @@
-Introduction to Neurosignals
+# Introduction to Neurosignals
 
-Bunch of different kind of cells
-  Form follows function!
-  Neurons have cell body, axon and dendrites 
+**Form follows function**
+  
+There are many different types of neurons that are specialized for signal monitoring, generation, communication and output. All neurons have cell body, axon and dendrites that have functoinally differentiated puirposes. The myelin sheath insulates and speeds the transmission of signals. 
+  
+**Network of chemical and electrical circuits**
+
+Cells release action potentials above a spike threshhold stretch tthat release transmitters that adjust the speed and intensity of output signals
+  
