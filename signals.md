@@ -14,6 +14,10 @@ Often we use circuit diagrams (resistors, capacitors, etc.) to model currents of
 
 Damage in the circuits means that branches of the larger circuit are closed off. Therefore, we can generate signals but they never come across. Functionally anatomy is import to udnerstand how to augment and treat particular dieseases with BCI. Understand the healthy wiring diagram and you can troubleshoot and treat a damaged one. 
 
+***Cortical Architecture is Next Level of Processing***
 
+Structural changes in the brain in any of the lobes that are differentiated to function leads to misfiring of neurons. 
+
+We measure individual action potentials with voltage in cells, extract the action potentials and display them in smoothed waves that filter out through anatomy (see lecture diagrams). With the output of multiple different cells, you receive multi-unit activity spikes and need to filter out through threshold analysis key spikes (massive data and AT LEAST kilo hertz speeds).
 
   
