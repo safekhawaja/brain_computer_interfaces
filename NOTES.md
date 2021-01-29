@@ -38,10 +38,12 @@ When breaking down signals, the key ideas to remember are to know what you're re
 
 ***Talking to Neurons***
 
-Neurons generate and are affected by electric fields (we can inject signals as well as read) — what makes them special is their ability to *change* the permeability of the ion channels. Cell membranes are filled with proteins (many of which are ion channels) that make capacitors with diffusion gradients. 
+Neurons generate and are affected by electric fields (we can inject signals as well as read) — what makes them special is their ability to *change* the permeability of the ion channels. Cell membranes are filled with proteins (many of which are ion channels) that make **capacitors** with diffusion gradients. Membranes can actually be modelled with Kirchoff's laws and parallel conductance models. 
 
 The two forces are the diffusion force and the electrical force across the neurons. The ions in solution can charge so generate fields. Ions themselves like to equalize concentration and so diffuse to spread. The membrane walls are made of lipid bilayers which are semi-permeable so ions can diffuse across. Various ions are across each side in different concentrations, which build up the calculable Nernst potential across.
 
+Action potentials are all or nothing unidirectional events when concentration crosses a threshold on electrical psynapes. The conductance is governed by the channel and can change quickly! The neurotansmitter binds to the subsequent cell, and the previous gate closes. Na+ jumps from node-to-node in myelin around axons. 
 
+Bottom line: we need to figure out which circuits are important for us to facillitate or reduce activity.
 
 (Prof is a bass player?)
