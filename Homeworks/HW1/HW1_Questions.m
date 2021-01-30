@@ -64,21 +64,40 @@ durationInSec = durationInUSec / 1e6
 
 nr = ceil((session.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session.data.sampleRate); 
 allData = session.data.getvalues(1:nr,1);
-sample_rate_D002 = 200;
+sr2 = 200;
 
-first_500_ms_HW1=allData(1:0.5*sample)_rate_D002); 
-max_peak_HW1=max(first 500 ms HW1)
+ms1 = allData(1:0.5*sr2); 
+peak1 = max(ms1)
 
 % Initialize session and pull HW0 data: 
 
-session = IEEGSession('I521_A0001_D001', 'saifkhawaja', 'sai_ieeglogin.bin')
+session0 = IEEGSession('I521_A0001_D001', 'saifkhawaja', 'sai_ieeglogin.bin')
 
-session.data
+session0.data
 
+sr1 = 32051;
+nr = ceil((session0.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session.data.sr1); 
+allData = session0.data.getvalues(1:nr,1);
+sr1 = 200;
+
+ms0 = allData(1:0.5*sr1); 
+peak0 = max(ms1)
+
+A_D001 = mean(ms0) 
+A_D002 = mean(ms1)
 
 %%
 % <latex>
 %  \item The unit activity sample in \texttt{(I521\_A0001\_D001)} was high-pass filtered to remove low-frequency content. Assume that the seizure activity in \texttt{(I521\_A0001\_D002)} has not been high-pass filtered. Given that the power of a frequency band scales roughly as $1/f$, how might these differences in preprocessing contribute to the differences you noted in the previous question? (There is no need to get into specific calculations here. We just want general ideas.) (3 pts)
+% </latex>
+
+% <latex>
+%  \item The removal of noise through the high-pass filtering in pre-processing cleaning of the data results in more prominent striations in the data. There are more oscillations in D001 than in D002, which would likely be resolved if the same pre-processing was implemented in D002.
+% Similarly, if we had preprovessed D002, we would observe flatter
+% oscillations and lower amplitudes because, as reference in the 1/f in
+% question, the power scales exponentially as frequency shrinks as the
+% amplitude increases. This means that the waves on the reading have lower
+% power and would flatten out if removed. Compared to D001, this would be flatter and if we did not remove the lower frequencies in D001 we would observe larger amplitude and sharper disparations in spikes as the signal would have a larger amount of content in lower frequencies.  
 % </latex>
 
 %%
@@ -86,10 +105,33 @@ session.data
 %  \item Two common methods of human iEEG are known as electrocorticography (ECoG) and stereoelectroencephalography (SEEG). For either of these paradigms (please indicate which you choose), find and report at least two of the following electrode characteristics: shape, material, size. Please note that exact numbers aren't required, and please cite any sources used. (3 pts)
 % </latex>
 
+% Electrocorticography (ECoG) places electrodes directly on exposed
+% surfaces of the brain to record cerebral cortex activity. ECoG electrode
+% arrays are typically organized as sixteen strile stainless steel carbon
+% tipped electrodes made of platinum, platinum-indium alloys or gold. Grid
+% electrodesa are widely used and have between 4 and 256 contacts.
+% Spacing is normally 1cm and individual electrodes are ~5mm in diameter.
+% References:
+% Mesgarani, N; Chang, EF (2012). "Selective cortical representation of attended speaker in multi-talker speech perception". Nature. 485 (7397): 233–6. Bibcode:2012Natur.485..233M. doi:10.1038/nature11020.
+% Schuh, L; Drury, I (1996). "Intraoperative electrocorticography and direct cortical electrical stimulation". Seminars in Anesthesia. 16: 46–55. doi:10.1016/s0277-0326(97)80007-4
+
 %%
 % <latex>
 %  \item What is a local field potential? How might the  characteristics of human iEEG electrodes cause them to record local field potentials as opposed to multiunit activity, which was the signal featured in HW0 as recorded from 40 micron Pt-Ir microwire electrodes? (2 pts)
 % </latex>
+
+% A local field potential is an extracellular signal generated from ion
+% concentration imbalances outside of cells. The potentials are generated
+% by the voltage from charge separation across this ion concentration
+% difference (relative excitatory and inhibitory dendric potentials).
+%
+% iEEG electrodes can record local field potentials because of their
+% comparitively large size (40 micron vs. 5mm diameter). This means the
+% signals recorded and read are a summation of multiple neuron potentials. The 40 micron Pt-Ir electrodes pick up signals from multiunit activity because of their size and the much higher sampling rate required for recording the minutia in adjustments.
+
+% Reference: Stacey WC, Kellis S, Greger B, et al. Potential for unreliable
+% interpretation of EEG recorded with microelectrodes. Epilepsia.
+% 2013;54(8):1391-1401. doi:10.1111/epi.12202 
 
 %%
 % <latex>
@@ -109,10 +151,35 @@ session.data
 %  \item Based on your observations, should we use all of the data or omit some of it? (There's no right answer, here, just make your case either way in a few sentences.) (2 pts)
 % </latex>
 
+% While there is a large similarity in most of the readings that there is a
+% noticeable peak, many of the recorded signals also have a large trough
+% (and sometimes multiple trouphs). Moreover, some trials had multiple peaks.
+% These indicate there could be additional stimuli (lights, noises, and
+% other sensory inputs) that triggered a response in the rat, and therefore 
+% these recordings should be removed as they do not isolate the signal we are 
+% looking for. 
 %%
 % <latex>
 %  \item Retrieve the \texttt{ep} and \texttt{stim} channel data in MATLAB. What is the average latency (in ms) of the peak response to the stimulus onset over all trials? (Assume stimuli occurs at exactly 1 second intervals)(3 pts)
 % </latex>
+
+% Initialize session for dataset 003 and pull information
+
+session3 = IEEGSession('I521_A0001_D003', 'saifkhawaja', 'sai_ieeglogin.bin');
+
+session3.data(1)
+
+nr = ceil((session3.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session3.data.sampleRate);
+data3 = session3.data.getvalues(1:nr, 1:2);
+
+ep = data3(:,1);
+stim = data3(:,2);
+
+% Obtain durtation and sample rate
+
+durationInUSec = session3.data(1).rawChannels(1).get_tsdetails.getDuration; 
+durationInSec = durationInUSec / 1e6;
+sr = session3.data.sampleRate;
 
 %%
 % <latex>
