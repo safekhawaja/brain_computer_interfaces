@@ -36,6 +36,9 @@ Somatosensory EPs are where body nerves are stimulated and synchronously EEG rec
 
 When breaking down signals, the key ideas to remember are to know what you're recording and why (know your neuroanatomy!), reduce the data where you can, learn the network architecture, and communicate your technique concisely.
 
+
+# Computational Modelling
+
 ***Talking to Neurons***
 
 Neurons generate and are affected by electric fields (we can inject signals as well as read) — what makes them special is their ability to *change* the permeability of the ion channels. Cell membranes are filled with proteins (many of which are ion channels) that make **capacitors** with diffusion gradients. Membranes can actually be modelled with Kirchoff's laws and parallel conductance models. 
@@ -45,10 +48,6 @@ The two forces are the diffusion force and the electrical force across the neuro
 Action potentials are all or nothing unidirectional events when concentration crosses a threshold on electrical psynapes. The conductance is governed by the channel and can change quickly! The neurotansmitter binds to the subsequent cell, and the previous gate closes. Na+ jumps from node-to-node in myelin around axons. 
 
 Bottom line: we need to figure out which circuits are important for us to facillitate or reduce activity.
-
-(Prof is a bass player?)
-
-# Computational Modelling
 
 ***Stimulation Modelling***
 
