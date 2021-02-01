@@ -41,9 +41,7 @@ Hz = session.data.sampleRate
 
 % Obtain the duration of the recording for channel 1 (retuyrned in microseconds).
 
-durationInUSec = session.data(1).rawChannels(1).get_tsdetails.getDuration;
-
-durationInSec = durationInUSec / 1e6
+durationInSec = session.data(1).rawChannels(1).get_tsdetails.getDuration / 1e6
 
 % durationInSec = 644.9950 seconds, which contrasts with 10s recorded in HW0.
 
@@ -153,30 +151,114 @@ A_D002 = mean(ms1)
 
 % While there is a large similarity in most of the readings that there is a
 % noticeable peak, many of the recorded signals also have a large trough
-% (and sometimes multiple). Moreover, some trials had multiple peaks.
-% These indicate there might be additional stimuli (lights, noises, and
-% other stressful sensory inputs) that triggered a response in the rat,
-% and therefore these recordings should be removed as they do not isolate
-% the signal we are looking for. 
+% (and sometimes multiple trouphs). Moreover, some trials had multiple peaks.
+% These indicate there could be additional stimuli (lights, noises, and
+% other sensory inputs) that triggered a response in the rat, and therefore 
+% these recordings should be removed as they do not isolate the signal we are 
+% looking for. 
 %%
 % <latex>
 %  \item Retrieve the \texttt{ep} and \texttt{stim} channel data in MATLAB. What is the average latency (in ms) of the peak response to the stimulus onset over all trials? (Assume stimuli occurs at exactly 1 second intervals)(3 pts)
 % </latex>
 
-% Initialize session for 003 and pull data
+% Initialize session for dataset 003 and pull information
 
 session3 = IEEGSession('I521_A0001_D003', 'saifkhawaja', 'sai_ieeglogin.bin');
 
 session3.data(1)
 
 nr = ceil((session3.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session3.data.sampleRate);
+data3 = session3.data.getvalues(1:nr, 1:2);
 
+ep = data3(:,1);
+stim = data3(:,2);
+
+% Obtain durtation and sample rate to use in calculation for peak difs
+
+durationInSec = session3.data(1).rawChannels(1).get_tsdetails.getDuration / 1e6; 
+sr = session3.data.sampleRate;
+
+% Calculate peak locations and store them in peakpoints array
+
+times = ceil(0:1:durationInSec);
+
+initial = 1;
+final = sr;
+
+peakpoints = [];
+
+for i=1:length(times)
+    length=ep(initial:final);
+    
+    [peak, index] = max(length);
+    index = index/final;
+    peakpoints(i) = index;
+    
+    initial = final + 1;
+    final = final + sr;
+end
+
+average_latency = mean(peakpoints)
+
+% The mean of the latency time is 0.162 seconds as calculated above. 
+    
 
 %%
 % <latex>
 %  \item In neuroscience, we often need to isolate a small neural signal buried under an appreciable amount of noise.  One technique to accomplish this is called the spike triggered average, sometimes called signal averaging. This technique assumes that the neural response to a repetitive stimulus is constant (or nearly so), while the noise fluctuates from trial to trial - therefore averaging the evoked response over many trials will isolate the signal and average out the noise.
 %  Construct a spike triggered average plot for the data in \texttt{I521\_A0001\_D003}.  Plot the average EP in red.  Using the commands \texttt{hold on} and \texttt{hold off} as well as \texttt{errorbar} and \texttt{plot}, overlay error bars at each time point on the plot to indicate the standard deviation of the responses at any given time point.  Plot the standard deviation error bars in gray (RGB value: [0.7 0.7 0.7]). Make sure to give a proper legend along with your labels. (4 pts)
 % </latex>
+
+% Set up
+
+session3 = IEEGSession('I521_A0001_D003', 'saifkhawaja', 'sai_ieeglogin.bin');
+
+session3.data(1)
+
+nr = ceil((session3.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session3.data.sampleRate);
+data3 = session3.data.getvalues(1:nr, 1:2);
+
+% ep = data3(:,1);
+% stim = data3(:,2);
+
+% Obtain duration and sample rate 
+
+durationInSec = (session3.data(1).rawChannels(1).get_tsdetails.getDuration) / 1e6; 
+sr = session3.data.sampleRate;
+
+% Prepare for STAP
+
+times = ceil(0:1:durationInSec);
+
+average_m = [];
+
+% Parse readings and store  
+
+initial = 1;
+final = sr;
+
+for i = 1:length(times)
+    window = ep(initial:final);
+    average_m(i,:) = window;
+    
+    initial = final + 1;
+    final = final + sr;
+end
+
+% averaged_m = mean(average_m, 1);
+
+% error = std(average_m, 1);
+
+figure('Color','white')
+errorbar(0:1/sr:1-(1/sr), mean(average_m, 1), std(average_m, 1), 'Color', [0.6 0.8 0.9])
+
+hold on
+plot(0:1/sr:1-(1/sr), mean(average_m, 1))
+xlabel('Time (s)')
+ylabel('Amplitude (uV)')
+legend('Error via Standard Deviation', 'Average Evoked Potential') 
+title('Spike Triggered Average')
+hold off
 
 %%
 % <latex>
@@ -185,10 +267,89 @@ nr = ceil((session3.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session3.d
 % 	\item We often want to get a sense for the amplitude of the noise in a single trial. Propose a method to do this (there are a few reasonably simple methods, so no need to get too complicated). Note: do not assume that the signal averaged EP is the ``true'' signal and just subtract it from that of each trial, because whatever method you propose should be able to work on the signal from a single trial or from the average of the trials. (4 pts)
 % </latex>
 
+% We can identify and reduce noise through a number of methods, one of
+% which is taking a moving average across short time bursts. A moving
+% average is a succession of averages derived from successive segments
+% (typically of constant size and overlapping) of a series of values. 
+% In this context, we can average the scucessive amplitudes of n amount of
+% neighbouring points (say 60) using the movmean function. After
+% subtracting the generated signal from the original, we can average the
+% noise out to approximate noise presence over time, which can the be
+% averaged again for mean noise presence. This does operate on the premise 
+% that the noise is equidistant from the calculated initial mean. 
+
 %%
 % <latex>
 % 	\item Show with a few of the EPs (plots and/or otherwise) that your method gives reasonable results. (1 pt)
 % </latex>
+
+% First four trials below. All values except x are redeclared per trial as each new cycle requires redeclaration. Looking at the figures, this seems reasonable as a method. 
+
+noise_init_1 = 1;
+noise_final_1 = sr;
+window_pass = ep(noise_init_1:noise_final_1);
+mvng_avg = movmean(window_pass, 30);
+
+x_vals = 0:1/sr:1-(1/sr);
+
+figure
+subplot(4, 1, 1, 'align')
+plot(x_vals, mvng_avg, 'Linewidth', 3, 'Color', 'b') 
+xlabel('T (s)')
+ylabel('A (uV)')
+title('Pre-Processed Noise Reduced EP 1') 
+hold on
+plot(x_vals, window_pass, 'Color','y')
+legend('Adjusted Signal','Unadjusted Signal')
+hold off
+
+noise_init_2 = noise_final_1 + 1; 
+noise_final_2 =noise_final_1 + sr;
+
+window_pass = ep(noise_init_2:noise_final_2);
+mvng_avg = movmean(window_pass, 30);
+
+subplot(4, 1, 2, 'align')
+plot(x_vals, mvng_avg, 'Linewidth', 3, 'Color','b') 
+xlabel('T (s)')
+ylabel('A (uV)')
+title('Pre-Processed Noise Reduced EP 2') 
+hold on
+plot(x_vals, window_pass, 'Color','y')
+legend('Adjusted Signal','Unadjusted Signal')
+hold off
+
+noise_init_3 = noise_final_2 + 1; 
+noise_final_3 =noise_final_2 + sr;
+
+window_pass = ep(noise_init_3:noise_final_3);
+mvng_avg = movmean(window_pass, 30);
+
+subplot(4, 1, 3, 'align')
+plot(x_vals, mvng_avg, 'Linewidth', 3, 'Color','b') 
+xlabel('T (s)')
+ylabel('A (uV)')
+title('Pre-Processed Noise Reduced EP 3') 
+hold on
+plot(x_vals, window_pass, 'Color','y')
+legend('Adjusted Signal','Unadjusted Signal')
+hold off
+
+noise_init_4 = noise_final_3 + 1; 
+noise_final_4 =noise_final_3 + sr;
+
+window_pass = ep(noise_init_4:noise_final_4);
+mvng_avg = movmean(window_pass, 30);
+
+subplot(4, 1, 4, 'align')
+plot(x_vals, mvng_avg, 'Linewidth', 3, 'Color','b') 
+xlabel('T (s)')
+ylabel('A (uV)')
+title('Pre-Processed Noise Reduced EP 4') 
+hold on
+plot(x_vals, window_pass, 'Color','y')
+legend('Adjusted Signal','Unadjusted Signal')
+hold off
 
 %%
 % <latex>
@@ -197,15 +358,34 @@ nr = ceil((session3.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session3.d
 %         \item Apply your method on each individual trial and report the mean noise amplitude across all trials. (1 pt)
 % </latex>
 
+initial = 1;
+final = sr;
+
+for i=1:length(times)
+    delta = mean(abs(movmean(ep(initial:final), 30) - ep(initial:final)));
+    noise(i) = delta;
+    
+    initial = final + 1;
+    final = final + sr;
+end
+
+mean(noise)
+
 %%
 % <latex>
 %         \item Apply your method on the signal averaged EP and report its noise. (1 pt)
 % </latex>
 
+mean(mean(abs(mean(average_m, 1) - movmean(mean(average_m, 1), 30))))
 %%
 % <latex>
 % 	    \item Do these two values make sense? Explain. (1 pt)
 % </latex>
+
+% Yes — noise in the averaged EP signal had already been partially 
+% removed when we took the mean. If we look at the values, the signal
+% averaged EP has a 44.93 uV noise content, which is comparitively small to
+% the 384.94 uV of mean amplitude of noise across all the trials.  
 
 %%
 % <latex>
