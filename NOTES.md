@@ -47,3 +47,17 @@ Action potentials are all or nothing unidirectional events when concentration cr
 Bottom line: we need to figure out which circuits are important for us to facillitate or reduce activity.
 
 (Prof is a bass player?)
+
+# Computational Modelling
+
+***Stimulation Modelling***
+
+Brain stimulation has been a huge success for BCI regarding Parkinson's (see later lecture). McIntyre created a computational model of the brain to optimize training time for parameter testing in this context, which sped up the treatment extremely quickly. When we stimulate a neuron, the actual activity is depressed but neighboring activity is excited. This computational model was built using Kirchoff's laws and basic circuit components. Generated fields do drop in intensity and widen as you go further out and so finite element analysis was used and spread *before* computing any parameters. To support modelling, real world measurements were used instead of placeholder values.  The effect of said stimulation was different in dendrites than in soma (and he made a lot of moiney finding that out). As many engineer disciplines as there exist reflect the number of areas in BCI research - experimentalists, device engineers, biocompatibility, computati0onal modelling and more. 
+
+***Saif***
+
+Saif
+
+
+
+
