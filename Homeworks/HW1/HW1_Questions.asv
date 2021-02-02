@@ -87,9 +87,7 @@ peak0 = max(ms0)
 A_D001 = mean(ms0) 
 A_D002 = mean(ms1)
 
-% As we can see here, the average amplitude of HW0 is much smaller so has
-% less variation in signal over the period of data collected.
-% Additionally, the frequency of 001 is much higher.
+% As we can see here, the average amplitude of HW0 is much larger.
 
 %%
 % <latex>
@@ -97,18 +95,12 @@ A_D002 = mean(ms1)
 % </latex>
 
 % <latex>
-%  \item The removal of noise through the high-pass filtering in
-%  pre-processing cleaning of the data results in more prominent striations
-%  in the data. There are more oscillations in D001 than in D002, which
-%  would likely be resolved if the same pre-processing was implemented in D002.   
+%  \item The removal of noise through the high-pass filtering in pre-processing cleaning of the data results in more prominent striations in the data. There are more oscillations in D001 than in D002, which would likely be resolved if the same pre-processing was implemented in D002.
 % Similarly, if we had preprovessed D002, we would observe flatter
 % oscillations and lower amplitudes because, as reference in the 1/f in
 % question, the power scales exponentially as frequency shrinks as the
 % amplitude increases. This means that the waves on the reading have lower
-% power and would flatten out if removed. Compared to D001, this would be
-% flatter and if we did not remove the lower frequencies in D001 we would
-% observe larger amplitude and sharper disparations in spikes as the signal
-% would have a larger amount of content in lower frequencies.     
+% power and would flatten out if removed. Compared to D001, this would be flatter and if we did not remove the lower frequencies in D001 we would observe larger amplitude and sharper disparations in spikes as the signal would have a larger amount of content in lower frequencies.  
 % </latex>
 
 %%
@@ -122,14 +114,9 @@ A_D002 = mean(ms1)
 % tipped electrodes made of platinum, platinum-indium alloys or gold. Grid
 % electrodesa are widely used and have between 4 and 256 contacts.
 % Spacing is normally 1cm and individual electrodes are ~5mm in diameter.
-%
 % References:
-% Mesgarani, N; Chang, EF (2012). "Selective cortical representation of
-% attended speaker in multi-talker speech perception". Nature. 485 (7397):
-% 233–6. Bibcode:2012Natur.485..233M. doi:10.1038/nature11020.   
-% Schuh, L; Drury, I (1996). "Intraoperative electrocorticography and
-% direct cortical electrical stimulation". Seminars in Anesthesia. 16:
-% 46–55. doi:10.1016/s0277-0326(97)80007-4  
+% Mesgarani, N; Chang, EF (2012). "Selective cortical representation of attended speaker in multi-talker speech perception". Nature. 485 (7397): 233–6. Bibcode:2012Natur.485..233M. doi:10.1038/nature11020.
+% Schuh, L; Drury, I (1996). "Intraoperative electrocorticography and direct cortical electrical stimulation". Seminars in Anesthesia. 16: 46–55. doi:10.1016/s0277-0326(97)80007-4
 
 %%
 % <latex>
@@ -143,10 +130,7 @@ A_D002 = mean(ms1)
 %
 % iEEG electrodes can record local field potentials because of their
 % comparitively large size (40 micron vs. 5mm diameter). This means the
-% signals recorded and read are a summation of multiple neuron potentials.
-% The 40 micron Pt-Ir electrodes pick up signals from multiunit activity
-% because of their size and the much higher sampling rate required for
-% recording the minutia in adjustments.   
+% signals recorded and read are a summation of multiple neuron potentials. The 40 micron Pt-Ir electrodes pick up signals from multiunit activity because of their size and the much higher sampling rate required for recording the minutia in adjustments.
 
 % Reference: Stacey WC, Kellis S, Greger B, et al. Potential for unreliable
 % interpretation of EEG recorded with microelectrodes. Epilepsia.
@@ -258,9 +242,7 @@ average_m = [];
 initial = 1;
 final = sr;
 
-x = 0:1/sr:1-(1/sr);
-
-for i = 1:(length(times))
+for i = 1:length(times)
     window = ep(initial:final);
     average_m(i,:) = window;
     
@@ -273,7 +255,7 @@ end
 % error = std(average_m, 1);
 
 figure('Color','white')
-errorbar(x, mean(average_m, 1), std(average_m, 1), 'Color', [0.7 0.7 0.7])
+errorbar(0:1/sr:1-(1/sr), mean(average_m, 1), std(average_m, 1), 'Color', [0.6 0.8 0.9])
 
 hold on
 plot(0:1/sr:1-(1/sr), mean(average_m, 1))
