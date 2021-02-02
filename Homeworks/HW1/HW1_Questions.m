@@ -76,7 +76,7 @@ session0 = IEEGSession('I521_A0001_D001', 'saifkhawaja', 'sai_ieeglogin.bin')
 session0.data
 
 sr1 = 32051;
-nr = ceil((session0.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session.data.sr1); 
+nr = ceil((session0.data.rawChannels(1).get_tsdetails.getEndTime) / 1e6*session.data.sr1);
 allData = session0.data.getvalues(1:nr,1);
 sr1 = 200;
 
