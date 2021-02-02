@@ -61,3 +61,19 @@ We discussed Nernst potentials, membranes, ionic currents and parallel conductan
 
 Faradaic currents are from oxidation and reduction reactions at electrodes. We limit the faradic component and anodic currents as they can damage tissues for the individual being recorded. Some cathodic currents (particularly electrolysis with water) are irreversible as well. We need to 1) be fast enough to avoid gas formation and 2) be fast enough such that reactants don't run away. There is a hardcore race to invent better materials for electrodes since many are toxic or too reactive to us. Professor Litt is interested in graphene or maxene sealing of strong but toxic materials.
 
+# Brain-Computer Interfaces
+
+***What is a BCI?***
+
+A BCI measures brain activity communicating to peripheral nerves and muscles via brain and CNS, processes it through signals and pattern recognition, and produces computational control signals that reflect the user's intent. The user's intent triggers a complex activation of brain areas that send signals through the peripheral nervous system to the muscles to perform a task. This is called efferent output (and the other way is afferent). As a sytstem, BCIs bypass the efferent pathways but must provide feedback to the user and rely on intentional control. 
+
+![](/Images/bci.png)
+
+BCIs are a subeset of neuroprostheses, which are devices that cannot only receive output from the nervous system but provide input (i.e. control *both* effeent and afferent outputs).
+
+![](/Images/neuroprostheses.png)
+
+
+
+![](/Images/index.png)
+
