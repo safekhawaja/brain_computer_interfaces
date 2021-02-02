@@ -4,13 +4,13 @@
   
 There are many different types of neurons that are specialized for signal monitoring, generation, communication and output. All neurons have cell body, axon and dendrites that have functoinally differentiated puirposes. The myelin sheath insulates and speeds the transmission of signals. 
 
-![](/neuronanatomy.png)
+![](/Images/neuronanatomy.png)
   
 ***Networks of Chemical and Electrical Circuits***
 
 Cells release action potentials above a spike threshhold stretch that release transmitters that adjust the speed and intensity of output signals. We record from ion channels that open (Na+ flows to increase V for an excited neurotransmitter / Cl- for inhibitory neurotransmitters or mechanical stress and deformation etc.). Released clots of transmitters that diffuse across psynaptic cleffs can be monitored. We drive cells to manipulate circuits and use voltage clamps to measure ion conductance. 
 
-![](/neurontypes.png)
+![](/Images/neurontypes.png)
 
 ***The Logic of Dendrites***
 
@@ -18,7 +18,7 @@ Often we use circuit diagrams (resistors, capacitors, etc.) to model currents of
 
 Damage in the circuits means that branches of the larger circuit are closed off. Therefore, we can generate signals but they never come across. Functionally anatomy is import to udnerstand how to augment and treat particular dieseases with BCI. Understand the healthy wiring diagram and you can troubleshoot and treat a damaged one. 
 
-![](/reflexcircuit.png)
+![](/Images/reflexcircuit.png)
 
 ***Cortical Architecture is Next Level of Processing***
 
@@ -36,6 +36,9 @@ Somatosensory EPs are where body nerves are stimulated and synchronously EEG rec
 
 When breaking down signals, the key ideas to remember are to know what you're recording and why (know your neuroanatomy!), reduce the data where you can, learn the network architecture, and communicate your technique concisely.
 
+
+# Computational Modelling
+
 ***Talking to Neurons***
 
 Neurons generate and are affected by electric fields (we can inject signals as well as read) — what makes them special is their ability to *change* the permeability of the ion channels. Cell membranes are filled with proteins (many of which are ion channels) that make **capacitors** with diffusion gradients. Membranes can actually be modelled with Kirchoff's laws and parallel conductance models. 
@@ -46,4 +49,15 @@ Action potentials are all or nothing unidirectional events when concentration cr
 
 Bottom line: we need to figure out which circuits are important for us to facillitate or reduce activity.
 
-(Prof is a bass player?)
+***Stimulation Modelling***
+
+Brain stimulation has been a huge success for BCI regarding Parkinson's (see later lecture). McIntyre created a computational model of the brain to optimize training time for parameter testing in this context, which sped up the treatment extremely quickly. When we stimulate a neuron, the actual activity is depressed but neighboring activity is excited. This computational model was built using Kirchoff's laws and basic circuit components. Generated fields do drop in intensity and widen as you go further out and so finite element analysis was used and spread *before* computing any parameters. To support modelling, real world measurements were used instead of placeholder values.  The effect of said stimulation was different in dendrites than in soma (and he made a lot of moiney finding that out). As many engineer disciplines as there exist reflect the number of areas in BCI research - experimentalists, device engineers, biocompatibility, computati0onal modelling and more. 
+
+***A Conversation with Neurons***
+
+We discussed Nernst potentials, membranes, ionic currents and parallel conductance models above. McIntyre's paper made this real. The nernst potential across psynapses for ions creates the Nernst potential, and these voltage and ligand gated channels control flow.  Cells respond differnetly to different frequencies across the synapes (capacitance and resistance), which acts as a band pass filter to the previous neuron. Dendrites follow cable theory and so are easily computationally modelled. Fields can be recorded on the scalp with surface electrodes, and the polarity will depend on whether the current source or sink is closer to the electrode. Groups of neurons can best be modelled by a dipole cylinder (Id . cos(theta)/(8pi.sigma.r^2)). Electrodes are impedance loads and work as voltage dividers to stimulate or record signals with fields. 
+
+***Electrochemistry***
+
+Faradaic currents are from oxidation and reduction reactions at electrodes. We limit the faradic component and anodic currents as they can damage tissues for the individual being recorded. Some cathodic currents (particularly electrolysis with water) are irreversible as well. We need to 1) be fast enough to avoid gas formation and 2) be fast enough such that reactants don't run away. There is a hardcore race to invent better materials for electrodes since many are toxic or too reactive to us. Professor Litt is interested in graphene or maxene sealing of strong but toxic materials.
+
