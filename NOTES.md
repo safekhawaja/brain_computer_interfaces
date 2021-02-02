@@ -61,3 +61,34 @@ We discussed Nernst potentials, membranes, ionic currents and parallel conductan
 
 Faradaic currents are from oxidation and reduction reactions at electrodes. We limit the faradic component and anodic currents as they can damage tissues for the individual being recorded. Some cathodic currents (particularly electrolysis with water) are irreversible as well. We need to 1) be fast enough to avoid gas formation and 2) be fast enough such that reactants don't run away. There is a hardcore race to invent better materials for electrodes since many are toxic or too reactive to us. Professor Litt is interested in graphene or maxene sealing of strong but toxic materials.
 
+# Brain-Computer Interfaces
+
+***What is a BCI?***
+
+A BCI measures brain activity communicating to peripheral nerves and muscles via brain and CNS, processes it through signals and pattern recognition, and produces computational control signals that reflect the user's intent. The user's intent triggers a complex activation of brain areas that send signals through the peripheral nervous system to the muscles to perform a task. This is called efferent output (and the other way is afferent). As a sytstem, BCIs bypass the efferent pathways but must provide feedback to the user and rely on intentional control. 
+
+![](/Images/bci.png)
+
+BCIs are a subeset of neuroprostheses, which are devices that cannot only receive output from the nervous system but provide input (i.e. control *both* effeent and afferent outputs). They can interact with both the peripheral and central nervous system, which gives rise to numerous inventions such as cochlear implants (auditory neural prostheses) and retinal implants (visual neural prostheses). Other human-computer interfaces require some level of muscular communcation (e.g. typing or tapping), which may not be accessible to everyone.
+
+![](/Images/neuroprostheses.png)
+
+***Taking Data***
+
+We can measure brain activity with and without surgery. Most BCIs actually rely on active electrical readings of brain activity using sensors places over the head (often on the scalp using electrodes). While well-established, it is not without problems as numerous chemical reactions mentioned above can occur. Moreover, the resolution and frequency ranges are limited. For consistency, we use the International 10 - 20 system to name the surface points of the head below that correspond to different parts of the brain. Letters depict the region of the brain (e.g. occipital lobe) and numbers the position (odd left, even right). 
+
+Other methods for taking data include hemodynamic techniques and magnetic imaging (MEG, fMRI/BOLD, NIRS). Surgically implanted sensors can be placed on the surface of the cortex (ECoG), which refrains from damaging the cortex because there is no brain penetration but acquires greater sensitivity in data. 
+
+![](/Images/index.png)
+
+Mental strategies affect the way we receive data: how is one focusing their attention to generate signals? The two common types are selective attention and motor imagery. Selective attention focuses on external stimuili e.g. visual, tactile, somatosensory or auditory stimulation (think different tones, textures and lights). Users have to focus attention on said stimulus to select a command. 
+
+Conversely, motor imagery requires the small movements of disparate limbs to select commands (e.g. two hands and two feet for four arrow directions). Moving a limb or even contracting a muscle adjusts brain activity (even preparing for movement in sensory motor rhythms (SMR)). SMR and other brain oscillations (as named by Greek letters) are easily recorded in event-related synchronization or desynchronization (changes in oscillatory activity in specific frequency bands), 
+
+***Preprocessing and Performance***
+
+Preprocessing simplifies subsequent processing operations without losing relevant informatoin. The goal is to improve the signal-to-noise-ratio (bad SNR means actual activity is too deeply buried under noise). Transofrmations and filtering techniques are employed to fix this. The mode of operation when taking data can also shift accuracy - synchroinous/cue-paced BCI that monitor within specific time frames can be more accurate. However, asynchronous BCIs are much more practical and users can use them at their leisure without worry.
+
+Performance is trivially measured using classification performance or error rate, but a general performance measure is the information transfer rate (ITR). This depends on the number of brain patters used, the time to classify said patterns, and their classificaiton accuracy. Because we can generate a task-dependent measure, this becomes much more meaningful.
+
+![](/Images/applications.png)
