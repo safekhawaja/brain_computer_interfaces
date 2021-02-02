@@ -91,4 +91,4 @@ Preprocessing simplifies subsequent processing operations without losing relevan
 
 Performance is trivially measured using classification performance or error rate, but a general performance measure is the information transfer rate (ITR). This depends on the number of brain patters used, the time to classify said patterns, and their classificaiton accuracy. Because we can generate a task-dependent measure, this becomes much more meaningful.
 
-![](/Images/performance.png)
+![](/Images/applications.png)
