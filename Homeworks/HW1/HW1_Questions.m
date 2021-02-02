@@ -62,8 +62,8 @@ durationInSec = session.data(1).rawChannels(1).get_tsdetails.getDuration / 1e6
 
 session = IEEGSession('I521_A0001_D002', 'saifkhawaja', 'sai_ieeglogin.bin');
 
-nr = ceil((session.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*(session.data.sampleRate));
-allData = session.data.getvalues(1:nr,1);
+nr = ceil((session.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*(session.data.sampleRate));  
+allData = session.data.getvalues(1:nr,1); 
 sr2 = 200;
 
 ms1 = allData(1:0.5*sr2); 
@@ -108,7 +108,9 @@ A_D002 = mean(ms1)
 % power and would flatten out if removed. Compared to D001, this would be
 % flatter and if we did not remove the lower frequencies in D001 we would
 % observe larger amplitude and sharper disparations in spikes as the signal
-% would have a larger amount of content in lower frequencies.     
+% would have a larger amount of content in lower frequencies. Since D002
+% has not been high pass filtered, we see a much larger amplitude variation
+% during onsets responsible. 
 % </latex>
 
 %%
@@ -139,16 +141,19 @@ A_D002 = mean(ms1)
 % A local field potential is an extracellular signal generated from ion
 % concentration imbalances outside of cells. The potentials are generated
 % by the voltage from charge separation across this ion concentration
-% difference (relative excitatory and inhibitory dendric potentials).
+% difference (relative excitatory and inhibitory dendric potentials). In
+% contrast, multiunit activity takes the mean of spikes in close proximity
+% to an individual electrode.
 %
 % iEEG electrodes can record local field potentials because of their
-% comparitively large size (40 micron vs. 5mm diameter). This means the
-% signals recorded and read are a summation of multiple neuron potentials.
-% The 40 micron Pt-Ir electrodes pick up signals from multiunit activity
-% because of their size and the much higher sampling rate required for
-% recording the minutia in adjustments.   
+% comparitively large size (40 micron vs. 5mm diameter) to MUA electrodes.
+% This means the signals recorded and read are a summation of multiple
+% neuron potentials. The 40 micron Pt-Ir electrodes pick up signals from
+% multiunit activity because of their size and the much higher sampling
+% rate required for recording the minutia in adjustments.   
 
-% Reference: Stacey WC, Kellis S, Greger B, et al. Potential for unreliable
+% Reference: 
+% Stacey WC, Kellis S, Greger B, et al. Potential for unreliable
 % interpretation of EEG recorded with microelectrodes. Epilepsia.
 % 2013;54(8):1391-1401. doi:10.1111/epi.12202 
 
@@ -172,7 +177,7 @@ A_D002 = mean(ms1)
 
 % While there is a large similarity in most of the readings that there is a
 % noticeable peak, many of the recorded signals also have a large trough
-% (and sometimes multiple trouphs). Moreover, some trials had multiple peaks.
+% (and sometimes multiple troughs). Moreover, some trials had multiple peaks.
 % These indicate there could be additional stimuli (lights, noises, and
 % other sensory inputs) that triggered a response in the rat, and therefore 
 % these recordings should be removed as they do not isolate the signal we are 
@@ -294,12 +299,13 @@ hold off
 % which is taking a moving average across short time bursts. A moving
 % average is a succession of averages derived from successive segments
 % (typically of constant size and overlapping) of a series of values. 
-% In this context, we can average the scucessive amplitudes of n amount of
-% neighbouring points (say 60) using the movmean function. After
+% In this context, we can average the successive amplitudes of n amount of
+% neighbouring points (say 30) using the movmean function. After
 % subtracting the generated signal from the original, we can average the
 % noise out to approximate noise presence over time, which can the be
 % averaged again for mean noise presence. This does operate on the premise 
-% that the noise is equidistant from the calculated initial mean. 
+% that the noise is equidistant from the calculated initial mean (a little
+% trivial but it gets the job done). 
 
 %%
 % <latex>
@@ -408,7 +414,9 @@ mean(mean(abs(mean(average_m, 1) - movmean(mean(average_m, 1), 30))))
 % Yes — noise in the averaged EP signal had already been partially 
 % removed when we took the mean. If we look at the values, the signal
 % averaged EP has a 44.93 uV noise content, which is comparitively small to
-% the 384.94 uV of mean amplitude of noise across all the trials.  
+% the 384.94 uV of mean amplitude of noise across all the trials.  This is
+% an order of magnitude difference, which indicates that the signal is more
+% prominent than the noise as we hope.
 
 %%
 % <latex>
