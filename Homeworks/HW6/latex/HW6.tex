@@ -1,0 +1,565 @@
+
+% This LaTeX was auto-generated from an M-file by MATLAB.
+% To make changes, update the M-file and republish this document.
+
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{listings}
+\usepackage[framed]{mcode}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage[utf8x]{inputenc}
+\usepackage{import}
+\usepackage{setspace}
+\usepackage{hyperref}
+\definecolor{lightgray}{gray}{0.5}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+    
+    
+%\section*{}
+
+
+\title{BE 521: Homework 6 \\{\normalsize Spike sorting}\\{\normalsize Spring 2021}}
+\author{60 points}
+\date{Due: Tuesday, 03/09/2021 10:00pm}
+\maketitle \textbf{Objective:} Detect and cluster spikes
+
+
+\begin{center} \author{Saif Khawaja \\
+  \normalsize Collaborators: Raveen K \\}
+\end{center}
+
+
+\subsection*{Overview}
+In this homework, you will do some basic spike sorting using two different datasets. The first (\verb|I521_A0006_D001|) is from a crayfish neuromuscular junction, a good model for human central nervous system synapses\footnote{The sampling rate of this data is 2000 Hz, which is adequate for this homework's instructional purposes but usually inadequate for real spike sorting, which often uses sampling frequencies on the order of 20 kHz.}. Specifically, the data contains two simultaneous recordings: an extracellular recording from the third nerve (channel \verb|nerve|) of a crayfish abdominal ganglion, which contains six spontaneously active motor neurons, and an intracellular recording from the superficial flexor muscle (channel \verb|muscle|) innervated by this nerve. You will attempt to discern relationships between the classes of spike waveforms you extract from the motor nerve trace and elicited potentials seen in the muscle fiber recording.
+Then, you will revisit a human intracranial EEG recording (\verb|I521_A0006_D002|) and use some of the techniques you've learned in class to build a more automated spike sorter.
+Note: While spikes may have positive and negative deflections, we will only focus on positive spikes on this homework for simplicity.
+\section{Spike Detection and Clustering (38 pts)}
+In this section, you will explore some basic filtering and spike thresholding to ultimately compare spike clusters you pick out by eye to those selected by an automated algorithm.
+\begin{enumerate}
+    \item You can assume that the nerve samples have already been low-pass filtered. Here you will high-pass filter in order to remove signals like slow local field potentials and 60 Hz power line noise. Create a 4th order \textit{elliptic filter} with 0.1 dB of ripple in the passband, a stopband 40 dB lower than the peak value in the passband, and a passband edge frequency of 300 Hz (see Matlab's \verb|ellip| function and make sure your give the edge frequency in the correct normalized form). The statement to create this filter (defined by the filter coefficients \verb|b| and \verb|a|) should look something like
+  \begin{lstlisting}
+	[b,a]=ellip(n,Rp,Rs,Wp,'high')
+  \end{lstlisting}
+  Clearly specify the denominator and numerator coefficients obtained for your filter function. (2pts)
+
+\begin{lstlisting}
+addpath('/Users/saif/Documents/GitHub/braincomputerinterfaces')
+addpath('/Users/saif/Documents/GitHub/braincomputerinterfaces/Homeworks/HW6')
+addpath('/Users/saif/Downloads/ieeg-matlab-1.14.49')
+\end{lstlisting}
+\begin{lstlisting}
+session = IEEGSession('I521_A0006_D001', 'saifkhawaja', '/Users/saif/Documents/GitHub/braincomputerinterfaces/Homeworks/sai_ieeglogin.bin' );
+
+session.data
+
+sr = 2000;
+
+durationInUSec = session.data(1).rawChannels(1).get_tsdetails.getDuration;
+durationInSec = durationInUSec / 1e6;
+
+nr = ceil((session.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session.data.sampleRate);
+nerve_data = session.data.getvalues(1:nr,2);
+muscle_data = session.data.getvalues(1:nr,1);
+
+[b, a] = ellip(4,0.1,40, 300/(sr/2),'high')
+
+% The denominator coefficients are 1.000, -1.7432, 1.6167, -0.6559, and
+% 0.1430.
+
+% The numerator coefficients are 0.3420, -1.2740, 1.8676, -1.2740, 0.3420.
+\end{lstlisting}
+
+\color{lightgray} \begin{lstlisting}Undefined function 'IEEGSession' for input arguments of type 'char'.
+
+Error in HW6 (line 37)
+session = IEEGSession('I521_A0006_D001', 'saifkhawaja', '/Users/saif/Documents/GitHub/braincomputerinterfaces/Homeworks/sai_ieeglogin.bin' );
+\end{lstlisting} \color{black}
+
+  \item Using the \verb|filter| function and \verb|filtfilt| function, obtain two different filtered outputs of the nerve signal.
+      \begin{enumerate}
+        \item In a 2x1 subplot, plot the first 50 ms of the unfiltered nerve signal in the top subplot; in the bottom subplot, plot the \verb|filter| output in blue and the \verb|filtfilt| output in red. Use a potential range (y-axis) of -20 to 50 millivolts. (4 pts)
+
+\begin{lstlisting}
+t_ms = 1/sr:1/sr:0.05;
+t_ms = t_ms * 1000;
+
+first50ms = (nerve_data(1:100)) / 1000;
+
+filter_out=filter(b,a, first50ms);
+filt_filt_out=filtfilt(b,a,first50ms);
+\end{lstlisting}
+\begin{lstlisting}
+figure
+subplot(2,1,2)
+plot(t_ms, filter_out,'b')
+hold on
+plot(t_ms, filt_filt_out,'r')
+ylabel('V (uV)')
+xlabel('T (ms)')
+title('Filtered Signal')
+legend('Filter Output','FF Output')
+ylim([-20, 50])
+subplot(2,1,1)
+plot(t_ms, first50ms)
+ylim([-20, 50])
+ylabel('V (uV)')
+xlabel('T (ms)')
+title('Unfiltered Signal')
+\end{lstlisting}
+
+        \item How is the unfiltered signal different from the filtered signal? What is different about the two filtered (red and blue) signals? (2 pts)
+
+\begin{lstlisting}
+% The unfiltered signal has greater variation (on the y-axcis) between points and a larger
+% amplitude (w/ larger spikes).
+
+% Compared to the red and the unfiltered signals, the blue signal is phase
+% shifted. The red signal isn't and so reflects the unfiltered data more
+% closely (compare relative to x-axis). It also sustains the substantial
+% spikes in potential whereas the processesd blue signal cuts these down.
+% The blue signal also has a lower maximum potential spike and the
+% variations in amplitude are very apparent.
+\end{lstlisting}
+
+        \item Briefly explain the mathematical difference between the two filtering methods, and why one method might be more advantageous than the other in the context of spike detection? (5 pts)
+
+\begin{lstlisting}
+% The filter function is a 1-D rational transfer function that filters
+% input data. The filtfilt function uses zero-phase digital filtering in
+% the forward and backward directions and then passes it through the
+% filter. Filtfilt builds on the filter with a zero phase distortion and
+% may be more useful in particular scenarios because, regarding detecting
+% spike presence, it has zero phase distortion so sustains activity of
+% unfiltered data at a given point in time (filter distorts in regard to
+% time). Timing can yield important insights into neurological behavior
+% (causes, synthesis, sensory input) that would affect analyses. Therefore,
+% filtfilt tends to be more appropriate for spike detection.
+\end{lstlisting}
+
+      \end{enumerate}
+        \item Using a spike threshold of +30 mV, calculate the index and value of the peak voltage for each spike in the \textbf{filtered} nerve signal (select the best one). Use these values to plot the first 2.5 seconds of the nerve signal with a red dot above (e.g. 10 mV above) each spike. (Hint: Plot the entire length of the nerve signal with all the spikes marked but then restrict the x-axis using \verb|xlim| to [0, 2.5] seconds) (4 pts)
+
+\begin{lstlisting}
+thrsh = 30;
+
+filtft = filtfilt(b,a,(nerve_data/1000));
+
+t2 = 1/sr:1/sr:durationInSec+1/sr;
+
+[pks, locs] = findpeaks(filtft, t2, 'MinPeakHeight', thrsh);
+
+figure
+plot(t2,filtft)
+hold on
+for i=1:length(locs)
+    plot(locs(i), pks(i)+10, 'r.','MarkerSize',12)
+    hold on
+end
+xlim([0 2.5])
+ylabel('V (mV)')
+xlabel('T (s)')
+title('Filtered Signal With Peaks')
+legend('Signal', 'Peak', 'Location', 'northwest')
+\end{lstlisting}
+
+ \item Under the assumption that different cells produce different action potentials with distinct peak amplitudes, decide how many cells you think were recorded (some number between 1 and 6). You may find it helpful to zoom in and pan on the plot you made in question 1.3. You may also find it useful to plot the sorted peak values to gain insight into where ``plateaus'' might be. (No need to include these preliminary plots in the report, though.) Use thresholds (which you well set manually/by eye) to separate the different spikes. Make a plot of the first 2.5 seconds similar to that in 1.3 except now color the spike dots of each group a different color (e.g., \verb|'r.'|,\verb|'g.'|,\verb|'k.'|,\verb|'m.'|).(6 pts)
+
+\begin{lstlisting}
+thrsh1 = 30;
+thrsh2 = 55;
+thrsh3 = 100;
+thrsh4 = 170;
+
+[pk1, l1] = findpeaks(filtft, t2, 'MinPeakHeight', thrsh1);
+[pk2, l2] = findpeaks(filtft, t2, 'MinPeakHeight', thrsh2);
+[pk3, l3] = findpeaks(filtft, t2, 'MinPeakHeight', thrsh3);
+[pk4, l4] = findpeaks(filtft, t2, 'MinPeakHeight', thrsh4);
+
+figure
+
+for i=1:length(l1)
+    h = plot(l1(i),pk1(i)+10,'g.','MarkerSize',12);
+    hf(1) = h(1);
+    hold on
+end
+
+for i=1:length(l2)
+    k=plot(l2(i),pk2(i)+10, 'r.','MarkerSize',12);
+    hf(2)=k(1);
+    hold on
+end
+
+for i=1:length(l3)
+    t=plot(l3(i),pk3(i)+10, 'm.','MarkerSize',12);
+    hf(3)=t(1);
+    hold on
+end
+
+for i=1:length(l4)
+    r=plot(l4(i),pk4(i)+10, 'k.','MarkerSize',12);
+    hf(4)=r(1);
+    hold on
+end
+
+e = plot(t2,filtft);
+hf(5) = e(1);
+xlim([0 2.5])
+ylabel('V (mV)')
+xlabel('T (s)')
+title('Filtered Signal (Peaks corresponds to each of 4 Cells)')
+legend(hf,{'Cell 1 Peaks','Cell 2 Peaks','Cell 3 Peaks','Cell 4 Peaks','Filtered Signal'}, 'Location', 'southoutside')
+\end{lstlisting}
+
+ \item Use Matlab's $k$-means\footnote{Clustering, like $k$-means you are using here, is a form of unsupervised learning.} function (\verb|kmeans|) to fit $k$ clusters (where $k$ is the number of cells you think the recording is picking up) to the 1D data for each spike.
+  \begin{enumerate}
+	\item Using the same color order (for increasing spike amplitude) as you did for the thresholds in question 1.4, plot the spike cluster colors as little dots slightly above those you made for question 1.4. The final figure should be a new plot of the nerve voltage and two dots above each spike, the first being your manual label and the second your clustered label, which (hopefully/usually) should be the same color. (4 pts)
+
+\begin{lstlisting}
+pkv = [];
+
+pkv = vertcat(pk1, pk2, pk3, pk4);
+
+rng(1)
+
+% all_locs = vertcat(l1',l2',l3',l4');
+% kmeans = [idx all_locs pkv];
+% idx = kmeans(pkv, 4);
+
+figure
+
+for i=1:length(l1)
+    h=plot(l1(i),pk1(i)+10,'g.','MarkerSize',12);
+
+    hf(1)=h(1);
+    hold on
+
+end
+
+for i=1:length(l2)
+    k=plot(l2(i),pk2(i)+10, 'r.','MarkerSize',12);
+    hf(2)=k(1);
+    hold on
+end
+
+for i=1:length(l3)
+    t=plot(l3(i),pk3(i)+10, 'm.','MarkerSize',12);
+    hf(3)=t(1);
+    hold on
+end
+
+for i=1:length(l4)
+    r=plot(l4(i),pk4(i)+10, 'k.','MarkerSize',12);
+    hf(4)=r(1);
+    hold on
+end
+
+for i=1:length(kmeans)
+    if kmeans(i,1)==3
+        plot(kmeans(i,2),kmeans(i,3)+30,'g.','MarkerSize',12);
+        hold on
+    elseif kmeans(i,1) ==4
+        plot(kmeans(i,2),kmeans(i,3)+30, 'r.','MarkerSize',12);
+        hold on
+    elseif kmeans(i,1) == 1
+        plot(kmeans(i,2),kmeans(i,3)+30, 'm.','MarkerSize',12);
+        hold on
+    elseif kmeans(i,1) ==2
+        plot(kmeans(i,2),kmeans(i,3)+30, 'k.','MarkerSize',12);
+        hold on
+    end
+end
+
+e = plot(t2,filtft);
+hf(5) = e(1);
+
+xlim([0 2.5])
+ylabel('V (mV)')
+xlabel('T (s)')
+title({'Filtered Signal (Peaks correspond to the 4 Cells Dots)', 'k-means Peaks Above Threshold'})
+legend(hf,{'Cell 1','Cell 2','Cell 3 Peaks','Cell 4','Filtered Signal'}, 'Location', 'southoutside')
+\end{lstlisting}
+
+	\item Which labeling, your manual ones or the ones learned by clustering) seem best, or do they both seem just as good? (Again, panning over the entire plot may be helpful.) (2 pts)
+
+\begin{lstlisting}
+% The labels for clustering and equibalent to the dots when plotted
+% manually. There are distinct points where the labels differ, but the
+% manual labels perform slightly better because the unsupervised nature
+% of the k-means algorithm only approximates based on intrinsic assumptions
+% from the algorithm on the data as opposed to manual selection of points.
+\end{lstlisting}
+
+  \end{enumerate}
+ \item In this question,  you will test the hypothesis that the muscle potential responses are really only due to spikes from a subset of the cells you have identified in the previous two questions. First, plot the first 2.5 seconds of the muscle fiber potential and compare it with that of the nerve. Observe the relationship between spikes and the muscle fiber response. (No need to include this plot and observation in your report.)
+     Now, calculate the maximum muscle fiber potential change\footnote{max voltage - min voltage} in the 25 ms\footnote{Note that this 25 ms window is somewhat ad hoc and is just what seems reasonable by eye for this data. It implies no underlying physiological time scale or standard.} window after each spike (with the assumption that spikes without any/much effect on the muscle fiber potential do not directly innervate it).
+  \begin{enumerate}
+   \item Using the cell groups you either manually defined or found via $k$-means clustering (just specify which you're using) again with different colors, plot a colored point for each spike where the x-value is the spike amplitude and the y-value is the muscle potential change. (6 pts)
+
+\begin{lstlisting}
+peakt = kmeans(:,2);
+
+mvmuscle = muscle_data / 1000;
+
+max_vd = [];
+
+for j=1:length(peakt)
+    i1 = find(t2 == peakt(j));
+    v_window = mvmuscle(i1:i1+49);
+    max_vd(j) = max(v_window) - min(v_window);
+end
+
+figure
+
+for i=1:length(l1)
+    h = plot(pk1(i),max_vd(i),'g.','MarkerSize', 12);
+    gf(1) = h(1);
+    hold on
+end
+
+for i=1:length(l2)
+    k = plot(pk2(i),max_vd(i+155), 'r.','MarkerSize', 12);
+    gf(2) = k(1);
+    hold on
+end
+
+for i=1:length(l3)
+    t = plot(pk3(i),max_vd(i+268), 'm.','MarkerSize', 12);
+    gf(3) = t(1);
+    hold on
+end
+
+for i=1:length(l4)
+    r = plot(pk4(i),max_vd(i+298), 'k.','MarkerSize', 12);
+    gf(4) = r(1);
+    hold on
+end
+
+xlabel('Peak Amplitude (mV)')
+ylabel('Max Voltage Change (mV)')
+title('Max Voltage Change v. Peak Amplitude w/ Manually Defined Thresholds')
+legend(gf,{'Cell 1','Cell 2','Cell 3','Cell 4'})
+\end{lstlisting}
+
+   \item Does this plot support the hypothesis that the muscle fiber responses are only due to a subset of the cells. Explain why or why not. (3 pts)
+
+\begin{lstlisting}
+% No — one can observe that each cell induces a change in muscle potential.
+% One can infer that each of 4 fcells recorded contributed to a large
+% adjustment in the potential from the muscle and therefore there is no
+% subset that is solely responsible for the response of the fiber.
+\end{lstlisting}
+
+  \end{enumerate}
+\end{enumerate}
+\section{Multivariate Clustering (22 pts)}
+In this section, you will explore similar methods for spikes sorting and clustering but with a different dataset, the human intracranial data in \verb|I521_A0006_D002|,
+which is a larger dataset of the same recording you saw in \verb|I521_A0001_D001| of Homework 1.
+  \begin{enumerate}
+   \item Using a threshold six standard deviations above the mean of the signal, detect the spikes in the signal. In addition, extract the waveform from 1 ms before the peak to 1 ms after it with peak value in the middle. (You will end up with a matrix where each row corresponds to the number of data points in 2 ms of signal minus 1 data point. Use the closest integer number of data points for the $\pm$ 1 ms window.)
+
+\begin{lstlisting}
+session2 = IEEGSession('I521_A0006_D002', 'saifkhawaja', '/Users/saif/Documents/GitHub/braincomputerinterfaces/Homeworks/sai_ieeglogin.bin' );
+
+nr2 = ceil((session2.data.rawChannels(1).get_tsdetails.getEndTime)/1e6*session2.data.sampleRate);
+
+dataa = session2.data.getvalues(1:nr2,1);
+
+durationInUSec_2 = session2.data(1).rawChannels(1).get_tsdetails.getDuration;
+durationInSec_2 = durationInUSec_2 / 1e6;
+
+mean_data = mean(dataa);
+std_data = std(dataa);
+
+thrshp2 = mean_data + 6 * std_data;
+
+[pk2, l2] = findpeaks(dataa);
+l2 = l2(pk2 > thrshp2);
+pk2 = pk2(pk2 > thrshp2);
+
+wf_m = zeros(length(l2),65);
+
+for u = 1:length(l2)
+    index_left = l2(u)-32;
+    index_right = l2(u)+32;
+    wf_m(u,:) = dataa(index_left:index_right);
+end
+\end{lstlisting}
+
+	\begin{enumerate}
+	  \item Plot the waveforms of all the spikes overlaid on each other in the same color. (4 pts)
+
+\begin{lstlisting}
+tplt = (1/65:(2/65):2);
+
+figure
+
+for s = 1:308
+    plot(tplt, wf_m(s,:),'r')
+    hold on
+end
+
+xlabel('T (ms)')
+ylabel('V (uV)')
+title('Overlaid Waveform Spikes')
+\end{lstlisting}
+
+	  \item Does it looks like there is more than one type of spike? (1 pt)
+
+\begin{lstlisting}
+% Two, with different amplitudes.
+\end{lstlisting}
+
+	\end{enumerate}
+   \item For each spike, represent the waveform by its  principal components. Use the \verb|pca| command in Matlab. Intuitively, principal component analysis finds the coordinate system that most reduces the variability in your data.
+	\begin{enumerate}
+	  \item Run principal component analysis on all the spike waveforms and represent your data with the top two principal components. Make a scatterplot of your data in this principal component (PC) space. (3 pts)
+
+\begin{lstlisting}
+matT = wf_m;
+
+[coeff, score, latent,~, explained] = pca(matT);
+
+figure
+plot(score(:,1),score(:,2),'.','MarkerSize',14)
+xlabel('PC 1 (uV)')
+ylabel('PC 2 (uV)')
+title('Top Two Principal Components')
+\end{lstlisting}
+
+	  \item Each PC also has an associated eigenvalue, representing the amount of variance explained by that PC. This an output of the \verb|PCA| command. Plot the  principal component vs the total (cumulative) percent variance explained. What is the percent variance explained if you include the top two principal components? (3 pts)
+
+\begin{lstlisting}
+explainedplt = [];
+
+for i=1:length(explained)
+    value = explained(1:i);
+    explainedplt(i) = sum(value);
+end
+
+figure
+plot(explainedplt)
+xlabel('Principal Components')
+ylabel('Percent Variance Explained (%)')
+top_two_explained = explained(1)+explained(2);
+title('Principal Component v. Total Percent Variance Explained')
+ylim([60 105])
+\end{lstlisting}
+\begin{lstlisting}
+% The two PCs give reason for 73.7349% of the variance.
+\end{lstlisting}
+
+	  \item Does it look like there is more than one cluster of spikes? (1 pt)
+	\end{enumerate}
+
+\begin{lstlisting}
+% There are two clusters.
+\end{lstlisting}
+
+   \item Use the same \verb|kmeans| function as you used before to cluster the spikes based on these two (normalized) features (the waveforms represented by the top two PCs). You will use a slight twist, though, in that you will perform $k$-medians (which uses the medians instead of the mean for the cluster centers) by using the \verb|'cityblock'| distance metric (instead of the default \verb|'sqEuclidean'| distance). Make a plot similar to that in 2.2.a but now coloring the two clusters red and green. (3 pts)
+
+\begin{lstlisting}
+% idx_2=kmeans(score(:,1:2),2,'Distance','cityblock')
+
+figure
+for i=1:length(score)
+    if idx_2(i)==1
+        q = plot(score(i,1),score(i,2),'r.','MarkerSize',12);
+        qf(1)=q;
+        hold on
+    elseif idx_2(i)==2
+        o = plot(score(i,1),score(i,2),'g.','MarkerSize',12);
+        qf(2) = o;
+        hold on
+    end
+end
+xlabel('PC 1 (uV)')
+ylabel('PC 2 (uV)')
+title('Top Two PCs Sorted by K-Medians')
+legend(qf,{'Cluster 1','Cluster 2'})
+\end{lstlisting}
+
+  \item Make a plot similar to 2.1 but now coloring the traces red and green according to which cluster they are in. Overlay the mean of the waveforms in each cluster with a thick black line (use the parameter \verb|'LineWidth'| and value \verb|'4'|). (3 pts)
+
+\begin{lstlisting}
+c1s = 0;
+c2s = 0;
+
+for i=1:length(idx_2)
+    if idx_2(i) == 1
+        c1s = c1s+1;
+    elseif idx_2(i)==2
+        c2s = c2s+1;
+    end
+end
+
+figure
+cl1 = zeros(c1s,65);
+cl2 = zeros(c2s,65);
+
+for s=1:308
+    if idx_2(s)==1
+        e=plot(tplt,wf_m(s,:),'-g');
+        cl1(s,:)=wf_m(s,:);
+        kl(1)=e;
+        hold on
+    elseif idx_2(s)==2
+        z=plot(tplt,wf_m(s,:),'-r');
+        cl2(s,:)=wf_m(s,:);
+        kl(2)=z;
+        hold on
+    end
+end
+
+cl1f = cl1(any(cl1,2),:);
+cl2f = cl2(any(cl2,2),:);
+
+mcl1 = mean(cl1f,1);
+hold on
+
+mcl2 = mean(cl2f,1);
+hold on
+
+q = plot(tplt,mcl1,'k-','LineWidth',4);
+kl(3) = q;
+hold on
+
+plot(tplt,mcl2,'k-','LineWidth',4)
+xlabel('T (ms)')
+ylabel('V (uV)')
+title('Overlaid Spike Waveforms (Means Shown)')
+legend(kl,{'Cluster 1','Cluster 2','Means'})
+\end{lstlisting}
+
+  \item What is a disadvantage of using principal component analysis? (1 pts)
+
+\begin{lstlisting}
+% PCA can give rise to information loss and reduces inferential ability as
+% variables are linear combinations of original features.
+\end{lstlisting}
+
+  \item What are some dangers of using the clustering techniques in this homework? (List 3) (3 pts)
+
+\begin{lstlisting}
+% k-means clustering is heavily distorted by outliers as they skew
+% groupings.
+
+% The algorithm can infer clusters where there may be none e.g. if the data
+% is uniform.
+
+% Clusters are assumed to have a similar number of data points but that may
+% not be the case and lead to inaccurate groupings.
+\end{lstlisting}
+
+\end{enumerate}
+\end{document}
+
+
+
+
+\end{document}
+    
